@@ -1,0 +1,155 @@
+{% extends 'recipes/base.html' %}
+
+{% block title %}Все рецепты - Кулинарный сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Все рецепты</h1>
+    </div>
+</div>
+
+<!-- Фильтры и поиск -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Поиск</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search_query }}" placeholder="Поиск по названию, описанию или ингредиентам">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="category" class="form-label">Категория</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">Все категории</option>
+                            {% for value, label in category_choices %}
+                            <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="difficulty" class="form-label">Сложность</label>
+                        <select class="form-select" id="difficulty" name="difficulty">
+                            <option value="">Любая сложность</option>
+                            {% for value, label in difficulty_choices %}
+                            <option value="{{ value }}" {% if difficulty == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Найти
+                        </button>
+                        <a href="{% url 'recipe_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Результаты поиска -->
+{% if page_obj %}
+<div class="row">
+    {% for recipe in page_obj %}
+    <div class="col-md-4 mb-4">
+        <div class="card recipe-card">
+            {% if recipe.image %}
+            <img src="{{ recipe.image.url }}" class="card-img-top recipe-image" alt="{{ recipe.title }}">
+            {% else %}
+            <div class="card-img-top recipe-image bg-light d-flex align-items-center justify-content-center">
+                <i class="fas fa-utensils fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ recipe.title }}</h5>
+                <p class="card-text text-muted">{{ recipe.description|truncatewords:15 }}</p>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-clock"></i> {{ recipe.cooking_time }} мин
+                        </small>
+                        <small class="text-muted">
+                            <i class="fas fa-users"></i> {{ recipe.servings }} порций
+                        </small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-secondary">{{ recipe.get_category_display }}</span>
+                        <span class="difficulty-{{ recipe.difficulty }}">
+                            {% if recipe.difficulty == 'easy' %}
+                                <i class="fas fa-star"></i> Легко
+                            {% elif recipe.difficulty == 'medium' %}
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i> Средне
+                            {% else %}
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> Сложно
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> {{ recipe.author.username }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-eye"></i> Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Первая</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Предыдущая</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Следующая</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Последняя</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Рецепты не найдены</h4>
+            <p>Попробуйте изменить параметры поиска или добавить новый рецепт.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'recipe_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Добавить рецепт
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

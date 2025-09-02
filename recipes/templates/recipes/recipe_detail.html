@@ -1,0 +1,142 @@
+{% extends 'recipes/base.html' %}
+
+{% block title %}{{ recipe.title }} - Кулинарный сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'recipe_list' %}">Рецепты</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ recipe.title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            {% if recipe.image %}
+            <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}" style="height: 400px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                <i class="fas fa-utensils fa-5x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h1 class="card-title">{{ recipe.title }}</h1>
+                <p class="card-text lead">{{ recipe.description }}</p>
+                
+                <!-- Информация о рецепте -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <h5>{{ recipe.cooking_time }} мин</h5>
+                            <small class="text-muted">Время приготовления</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-users fa-2x text-success mb-2"></i>
+                            <h5>{{ recipe.servings }} порций</h5>
+                            <small class="text-muted">Количество порций</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-signal fa-2x difficulty-{{ recipe.difficulty }} mb-2"></i>
+                            <h5>{{ recipe.get_difficulty_display }}</h5>
+                            <small class="text-muted">Сложность</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-tag fa-2x text-info mb-2"></i>
+                            <h5>{{ recipe.get_category_display }}</h5>
+                            <small class="text-muted">Категория</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ингредиенты -->
+                <h3><i class="fas fa-list"></i> Ингредиенты</h3>
+                <div class="bg-light p-3 rounded mb-4">
+                    <pre class="mb-0">{{ recipe.ingredients }}</pre>
+                </div>
+
+                <!-- Инструкции -->
+                <h3><i class="fas fa-clipboard-list"></i> Инструкции по приготовлению</h3>
+                <div class="bg-light p-3 rounded">
+                    <pre class="mb-0">{{ recipe.instructions }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Информация об авторе -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-user"></i> Об авторе
+                </h5>
+                <p class="card-text">
+                    <strong>{{ recipe.author.username }}</strong><br>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> {{ recipe.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                </p>
+                {% if recipe.updated_at != recipe.created_at %}
+                <small class="text-muted">
+                    <i class="fas fa-edit"></i> Обновлено: {{ recipe.updated_at|date:"d.m.Y H:i" }}
+                </small>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Действия -->
+        {% if user.is_authenticated and user == recipe.author %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-cog"></i> Управление рецептом
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'recipe_update' recipe.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <a href="{% url 'recipe_delete' recipe.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Удалить
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Навигация -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-compass"></i> Навигация
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'recipe_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> Все рецепты
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'recipe_create' %}" class="btn btn-outline-success">
+                        <i class="fas fa-plus"></i> Добавить рецепт
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

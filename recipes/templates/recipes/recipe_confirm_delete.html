@@ -1,0 +1,55 @@
+{% extends 'recipes/base.html' %}
+
+{% block title %}Удаление рецепта - Кулинарный сайт{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Подтверждение удаления
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h5>Внимание!</h5>
+                    <p>Вы собираетесь удалить рецепт <strong>"{{ recipe.title }}"</strong>.</p>
+                    <p class="mb-0">Это действие нельзя отменить!</p>
+                </div>
+
+                {% if recipe.image %}
+                <div class="text-center mb-3">
+                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-thumbnail" style="max-width: 200px;">
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <h5>Информация о рецепте:</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Название:</strong> {{ recipe.title }}</li>
+                        <li><strong>Автор:</strong> {{ recipe.author.username }}</li>
+                        <li><strong>Категория:</strong> {{ recipe.get_category_display }}</li>
+                        <li><strong>Сложность:</strong> {{ recipe.get_difficulty_display }}</li>
+                        <li><strong>Время приготовления:</strong> {{ recipe.cooking_time }} минут</li>
+                        <li><strong>Количество порций:</strong> {{ recipe.servings }}</li>
+                        <li><strong>Дата создания:</strong> {{ recipe.created_at|date:"d.m.Y H:i" }}</li>
+                    </ul>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Да, удалить рецепт
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
